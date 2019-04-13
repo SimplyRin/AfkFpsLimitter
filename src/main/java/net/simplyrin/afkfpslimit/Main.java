@@ -1,5 +1,9 @@
 package net.simplyrin.afkfpslimit;
 
+import java.awt.DisplayMode;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
+
 import net.md_5.bungee.api.ChatColor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ChatComponentText;
@@ -37,13 +41,14 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 public class Main {
 
 	public static final String MODID = "AfkFpsLimitter";
-	public static final String VERSION = "1.0";
+	public static final String VERSION = "1.1";
 
 	private boolean isLimbo;
 	private int limitFramerate;
 
 	@EventHandler
 	public void init(FMLInitializationEvent event) {
+		Minecraft.getMinecraft().gameSettings.limitFramerate = this.getRefreshRate();
 		MinecraftForge.EVENT_BUS.register(this);
 	}
 
@@ -62,7 +67,7 @@ public class Main {
 
 	public void setAfk(boolean bool) {
 		if (this.limitFramerate == 0) {
-			this.limitFramerate = Minecraft.getMinecraft().gameSettings.limitFramerate;
+			this.limitFramerate = this.getRefreshRate();
 		}
 
 		if (this.isLimbo == bool) {
@@ -75,6 +80,23 @@ public class Main {
 		} else {
 			Minecraft.getMinecraft().gameSettings.limitFramerate = this.limitFramerate;
 		}
+	}
+
+	public int getRefreshRate() {
+		int rate = 60;
+
+		GraphicsEnvironment graphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment();
+		GraphicsDevice[] graphicsDevices = graphicsEnvironment.getScreenDevices();
+
+		for (int i = 0; i < graphicsDevices.length; i++) {
+			DisplayMode dm = graphicsDevices[i].getDisplayMode();
+
+			int refreshRate = dm.getRefreshRate();
+			if (refreshRate > rate) {
+				rate = refreshRate;
+			}
+		}
+		return rate;
 	}
 
 	public void sendMessage(String msg) {
