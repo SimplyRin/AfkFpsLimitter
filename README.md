@@ -4,10 +4,10 @@ Hypixel で AFK(Limbo) 中 FPS を 30 に変更する物
 別ゲーしながら放置するように作ったやつ
 
 # Release
-- [AfkFpsLimitter-1.0.jar](https://github.com/SimplyRin/AfkFpsLimitter/releases/download/1.0/AfkFpsLimitter-1.0.jar)
+- [AfkFpsLimitter-1.2.jar](https://github.com/SimplyRin/AfkFpsLimitter/releases/download/1.2/AfkFpsLimitter-1.2.jar)
 
 # Open Source Lisence
-**・[BungeeCord (Config API) | BSD 3-Clause "New" or "Revised" License](https://github.com/SpigotMC/BungeeCord/blob/master/LICENSE)**
+**・[BungeeCord (ChatColor API) | BSD 3-Clause "New" or "Revised" License](https://github.com/SpigotMC/BungeeCord/blob/master/LICENSE)**
 ```
 Copyright (c) 2012, md_5. All rights reserved.
 
