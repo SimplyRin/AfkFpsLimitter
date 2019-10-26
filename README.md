@@ -1,7 +1,7 @@
 # AfkFpsLimitter
 Hypixel で AFK(Limbo) 中 FPS を 30 に変更する物
 
-別ゲーしながら放置するように作ったやつ
+`/setfps <fps>` で Limbo から戻ってきたときに設定される FPS 値を設定してください。
 
 # Release
 - [AfkFpsLimitter-1.2.jar](https://github.com/SimplyRin/AfkFpsLimitter/releases/download/1.2/AfkFpsLimitter-1.2.jar)
