@@ -1,18 +1,25 @@
 package net.simplyrin.afkfpslimit;
 
-import java.awt.DisplayMode;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 
+import lombok.Setter;
 import net.md_5.bungee.api.ChatColor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ChatComponentText;
+import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.network.FMLNetworkEvent;
+import net.simplyrin.afkfpslimit.commands.CommandSetFps;
 
 /**
  * Created by SimplyRin on 2019/02/18.
@@ -41,15 +48,23 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 public class Main {
 
 	public static final String MODID = "AfkFpsLimitter";
-	public static final String VERSION = "1.1";
+	public static final String VERSION = "1.2";
 
 	private boolean isLimbo;
-	private int limitFramerate;
+	@Setter
+	private int limitFramerate = 144;
 
 	@EventHandler
 	public void init(FMLInitializationEvent event) {
-		Minecraft.getMinecraft().gameSettings.limitFramerate = this.getRefreshRate();
+		ClientCommandHandler.instance.registerCommand(new CommandSetFps(this));
 		MinecraftForge.EVENT_BUS.register(this);
+
+		this.loadConfig();
+	}
+
+	@SubscribeEvent
+	public void onConnect(FMLNetworkEvent.ClientConnectedToServerEvent event) {
+		Minecraft.getMinecraft().gameSettings.limitFramerate = this.limitFramerate;
 	}
 
 	@SubscribeEvent
@@ -60,16 +75,12 @@ public class Main {
 			this.setAfk(true);
 		}
 
-		if (msg.contains(" joined the lobby!")) {
+		if (msg.startsWith("[") && (msg.endsWith("joined the lobby!") || msg.endsWith("spooked in the lobby!"))) {
 			this.setAfk(false);
 		}
 	}
 
 	public void setAfk(boolean bool) {
-		if (this.limitFramerate == 0) {
-			this.limitFramerate = this.getRefreshRate();
-		}
-
 		if (this.isLimbo == bool) {
 			return;
 		}
@@ -82,25 +93,48 @@ public class Main {
 		}
 	}
 
-	public int getRefreshRate() {
-		int rate = 60;
-
-		GraphicsEnvironment graphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment();
-		GraphicsDevice[] graphicsDevices = graphicsEnvironment.getScreenDevices();
-
-		for (int i = 0; i < graphicsDevices.length; i++) {
-			DisplayMode dm = graphicsDevices[i].getDisplayMode();
-
-			int refreshRate = dm.getRefreshRate();
-			if (refreshRate > rate) {
-				rate = refreshRate;
-			}
-		}
-		return rate;
-	}
-
 	public void sendMessage(String msg) {
 		Minecraft.getMinecraft().thePlayer.addChatComponentMessage(new ChatComponentText(ChatColor.translateAlternateColorCodes('&', msg)));
+	}
+
+	public void saveConfig() {
+		File config = new File("config");
+		File file = new File(config, "AfkFpsLimitter.txt");
+		if (!file.exists()) {
+			try {
+				System.out.println("[AfkFpsLimitter-" + VERSION + "] Creating new config file...");
+				file.createNewFile();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
+		try {
+			FileWriter fileWriter = new FileWriter(file);
+			PrintWriter printWriter = new PrintWriter(new BufferedWriter(fileWriter));
+			printWriter.print(this.limitFramerate);
+			printWriter.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void loadConfig() {
+		File config = new File("config");
+		File file = new File(config, "AfkFpsLimitter.txt");
+		if (!file.exists()) {
+			return;
+		}
+
+		try {
+			BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
+			String line = bufferedReader.readLine();
+			bufferedReader.close();
+
+			this.limitFramerate = Integer.valueOf(line).intValue();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 }
